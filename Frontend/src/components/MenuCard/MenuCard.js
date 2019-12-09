@@ -1,13 +1,10 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import axios from 'axios';
+
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
-import hostAddress from '../constants';
-import {getMenu} from '../../js/actions/menu';
-import {checkOut} from '../../js/actions/search';
-import { connect } from "react-redux";
-
+import { graphql, compose, withApollo } from "react-apollo";
+import {getMenuQuery,getSectionQuery } from "../../queries/queries";
 
 let config = {
     headers:{
@@ -36,97 +33,45 @@ class MenuCard extends Component {
     }  
    
     componentDidMount(){
-        const data = {
-            email : this.props.restID
-        }
-    
-        // axios.defaults.withCredentials = true;
-        // axios.post('http://'+hostAddress+':3001/getMenu/getMenu',data,config)
-        // .then((response) => {
-        // //update the state with the response data
-        // console.log("In get menu constructor")
-        // resp1=response.data
-        // console.log(resp1)
-        // this.props.getSection(data);
-        // console.log(this.props.sectionList)
-        // if(this.props.sectionList!=null){
-        //     secList=this.props.sectionList;
-        //     console.log("secList",secList)
-            
-        // }
-        // })
-        this.props.getMenu(data);
-
-
-        axios.post('http://'+hostAddress+':3001/getSection/getSection',data,config)
-        .then((response) => {
-        //update the state with the response data
-        console.log("here in Sections")
-        console.log(response.data)
-        secList=response.data;
-        console.log(secList)
-        //console.log(resp1)
-        // this.setState({
-        //     menu : this.state.menu.concat(resp1) 
-        // });
+        this.props.client
+        .query({
+          query: getMenuQuery,
+          variables: {
+            email: "pam@pam.com"
+          }
         })
-    // console.log("i am ahiyaaa")
-    // console.log(resp1);
-    
-    // console.log("In menu")
-   // console.log(this.state.menu)
+        .then(response => {
+          console.log("get Restaurant profile", response.data.getMenu);
+          this.setState({
+            menu : this.state.menu.concat(response.data.getMenu) 
+        });
+        }).then(() => {
+            this.props.client
+              .query({
+                query: getSectionQuery,
+                variables: {
+                  email: localStorage.getItem("email")
+                }
+              })
+              .then(response => {
+                secList=response.data.viewSection;
+                this.setState({
+                  options: response.data.viewSection
+                });
+              });
+       
+        
+    });
+       
     }
    
+   
 setQuantity=(name,price,e)=>{
-    console.log(e);
-    console.log(e.target.value);
-    console.log(e.target.name)
-    quant.set(e.target.name,{
-        itemname:e.target.name,
-        qty:e.target.value,
-        price:name
-    });
-    //quant[e.target.name]=e.target.value;
-    console.log(quant); 
+   
     }
 
 checkOut=(e)=>{
-    console.log("Inside Checkout1")
-    let t=[];
-    let c=-1;
-    let a=quant.forEach((v,k,i)=>{
-    t[++c]=v;
-    })
-
-    const data = {
-        rid : this.props.restID,
-        qty : t,
-        uid : cookie.load('email'),
-        rname : this.props.restName
-    }
-    console.log(t)
-    if(quant==null){
-    alert("No Food Added to Cart!")
-    }else{
-    // axios.defaults.withCredentials = true;
-    // axios.post('http://'+hostAddress+':3001/checkOut/checkOut',data,config)
-    // .then((response) => {
-    // //update the state with the response data
-
-    this.props.checkOut(data);
-    if(this.props.checkoutMsg!=null){
-    alert(this.props.checkoutMsg);
-    goToCart=true;
-    this.setState({   
-    });
-    }
-    // alert(response.data)
-    // goToCart=true;
-    // this.setState({   
-    // });
-    console.log("Inside Checkout2")
-//});
-    }
+   
 }
 
     render(){
@@ -134,11 +79,11 @@ checkOut=(e)=>{
         let sectionDetails= secList.map(sec => {
             console.log("in section Display")
             console.log(sec)
-            let secItems=this.props.menu.filter(item=> item.sid == sec.value)
+            let secItems=this.state.menu.filter(item=> item.sid == sec)
             display.push(
                 <div>
                 <div style={{display:"Flex"}}>
-                <h4>{sec.value}</h4>
+                <h4>{sec}</h4>
                 </div>  
                 <table class="table">
                     <tbody>
@@ -154,7 +99,7 @@ checkOut=(e)=>{
                         <tr>
                             <td> 
                             <img
-                            src={"http://"+hostAddress+":3001/images/all/"+item.image+""}
+                            src=""
                             id="itemimg"
                             style={{height: "60px",width:"90px", margin : "10px"}}
                             alt="Item Display"/>
@@ -195,7 +140,7 @@ checkOut=(e)=>{
                 {goForward}
                 <div style={{backgroundColor:"white",marginLeft:"2%",opacity:"80%",overflowY:"auto"}}>
                 <div>
-                   <h2 style={{color:"red"}}>{this.props.restName}</h2>
+                   <h2 style={{color:"red"}}>{this.state.restName}</h2>
                    <hr></hr>
                    {display}
                     <a class="btn btn-primary2" onClick={this.checkOut.bind(this)}>Check Out</a>
@@ -204,24 +149,9 @@ checkOut=(e)=>{
             </div> 
         )}
 }
-//export Home Component
-//export default MenuCard;
 
-
-function mapDispatchToProps(dispatch) {
-    return {
-        getMenu: user => dispatch(getMenu(user)),
-        checkOut : user=>dispatch(checkOut(user))
-    };
-  }
-  
-  function mapStateToProps(store) {
-    return {
-      menu: store.menu,
-      checkoutMsg : store.checkoutMsg
-    };
-  }
- 
-  const MenuCardC = connect(mapStateToProps, mapDispatchToProps)(MenuCard);
-  export default MenuCardC;
-
+export default compose(
+    withApollo,
+    graphql(getMenuQuery, { name: "getMenuQuery" }),
+    graphql(getSectionQuery, { name: "getSectionQuery" }),
+  )(MenuCard);

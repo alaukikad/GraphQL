@@ -126,11 +126,6 @@ const RootQuery = new GraphQLObjectType({
         async resolve(parent, args) {
           console.log("Inside Get Menu");
           console.log(args);
-//   await Menu.find({email: args.email}, function(err, result){
-//     console.log(result)
-//     menu=result
-//   })
-  //console.log(menu)
           return Menu.find({email: args.email}) ;
         }
       }
@@ -151,8 +146,10 @@ const Mutation = new GraphQLObjectType({
         contact: { type: GraphQLString }
       },
       async resolve(parent, args) {
+        console.log("Inside User Register");
         console.log(args);
-        console.log(parent);
+        //console.log(parent);
+        
         //my signup logic here
         var user = Users({
           name: args.name,
@@ -191,6 +188,7 @@ const Mutation = new GraphQLObjectType({
         cuisine: { type: GraphQLString }
       },
       async resolve(parent, args) {
+        console.log("Inside Restaurant Register Login");
         console.log(args);
         console.log(parent);
         var restaurant = Restaurants({

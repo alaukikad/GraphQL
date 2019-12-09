@@ -1,10 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import axios from 'axios';
-import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
-import SearchFood from '../SeachFood/SearchFood';
-import hostAddress from '../constants';
+import MenuCard from '../MenuCard/MenuCard';
 
 class Chome extends Component {
     constructor(props){
@@ -19,6 +15,7 @@ class Chome extends Component {
           
                 <div class="container" style={{borderRadius:"12px"}} >
                 {/* <SearchFood/>      */}
+                <MenuCard/>
                 </div> 
             </div> 
         )

@@ -91,15 +91,7 @@ class AddItem extends Component {
 
   //submit Register handler to send a request to the node backend
   submitForm = e => {
-    var headers = new Headers();
-    // var scid;
-    // for(var i=0;i<this.state.secList.length;i++){
-    //     if(this.state.section== this.state.secList[i].value){
-    //      scid=this.state.secList[i].key;
-    //     break;
-    //     }
-    // }
-    //prevent page from refresh
+
     e.preventDefault();
     const data = {
     
@@ -113,6 +105,7 @@ class AddItem extends Component {
     ) {
       alert("Please fill all Fields!");
     } else {
+        alert("Item Added Successfully!");   
         this.props.addSectionMutation({
             variables: {
               email: localStorage.getItem('email'),
@@ -128,7 +121,7 @@ class AddItem extends Component {
           }).then(()=>{
               updateFlag=true;
           });
-          alert("Item Added Successfully!");     
+            
     }
   };
 
