@@ -15,7 +15,7 @@ class Chome extends Component {
           
                 <div class="container" style={{borderRadius:"12px"}} >
                 {/* <SearchFood/>      */}
-                <MenuCard/>
+                {/* <MenuCard/> */}
                 </div> 
             </div> 
         )
